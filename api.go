@@ -2880,3 +2880,31 @@ func (sc *Client) GetSitePrimaryAgentKey(corpName, siteName string) (PrimaryAgen
 
 	return primaryKey, nil
 }
+
+type AgentKey struct {
+	AccessKey string
+	SecretKey string
+	IsPrimary bool
+	Created   time.Time
+	Updated   time.Time
+}
+
+type AgentKeysResp struct {
+	Data []AgentKey `json:"data"`
+}
+
+// ListAgentKeys fetches a list of all agent keys for a site
+func (sc *Client) ListAgentKeys(corpName, siteName string) ([]AgentKey, error) {
+	resp, err := sc.doRequest("GET", fmt.Sprintf("/v0/corps/%s/sites/%s/agentKeys", corpName, siteName), "")
+	if err != nil {
+		return []AgentKey{}, err
+	}
+
+	var akr AgentKeysResp
+	err = json.Unmarshal(resp, &akr)
+	if err != nil {
+		return []AgentKey{}, err
+	}
+
+	return akr.Data, nil
+}
